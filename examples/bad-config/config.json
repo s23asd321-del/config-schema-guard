@@ -1,0 +1,19 @@
+{
+  "app": {
+    "debug": "yes",
+    "description": "tiny"
+  },
+  "server": {
+    "port": 70000
+  },
+  "logging": {
+    "level": "trace"
+  },
+  "auth": {
+    "token": "FAKE_TOKEN_FOR_TESTING_ONLY"
+  },
+  "unexpected": {
+    "mode": true
+  }
+}
+

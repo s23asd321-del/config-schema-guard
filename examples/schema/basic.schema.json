@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "name": "basic app config",
+  "fields": {
+    "app.name": {
+      "required": true,
+      "type": "string",
+      "min_length": 3,
+      "max_length": 40,
+      "description": "Application name"
+    },
+    "app.debug": {
+      "required": true,
+      "type": "boolean",
+      "description": "Debug mode flag"
+    },
+    "app.description": {
+      "required": false,
+      "type": "string",
+      "min_length": 10,
+      "max_length": 80,
+      "description": "Short application description"
+    },
+    "server.host": {
+      "required": true,
+      "type": "string",
+      "description": "Local host name or bind address"
+    },
+    "server.port": {
+      "required": true,
+      "type": "integer",
+      "min": 1,
+      "max": 65535,
+      "description": "TCP port number"
+    },
+    "logging.level": {
+      "required": false,
+      "type": "string",
+      "allowed": ["debug", "info", "warning", "error"],
+      "description": "Application log level"
+    },
+    "auth.token": {
+      "required": false,
+      "type": "string",
+      "sensitive": true,
+      "description": "Optional fake token used only in examples"
+    },
+    "labels": {
+      "required": false,
+      "type": "array",
+      "description": "Example label list"
+    },
+    "metadata": {
+      "required": false,
+      "type": "object",
+      "description": "Example metadata object"
+    }
+  }
+}
+

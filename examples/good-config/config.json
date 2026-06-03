@@ -1,0 +1,22 @@
+{
+  "app": {
+    "name": "demo-service",
+    "debug": false,
+    "description": "Example app configuration"
+  },
+  "server": {
+    "host": "localhost",
+    "port": 8080
+  },
+  "logging": {
+    "level": "info"
+  },
+  "auth": {
+    "token": "FAKE_TOKEN_FOR_TESTING_ONLY"
+  },
+  "labels": ["local", "example"],
+  "metadata": {
+    "owner": "example-team"
+  }
+}
+
