@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [
-  { name = "config-schema-guard contributors" }
+  { name = "s23asd321-del" }
 ]
 keywords = ["configuration", "schema", "validation", "cli", "toml", "json"]
 classifiers = [
