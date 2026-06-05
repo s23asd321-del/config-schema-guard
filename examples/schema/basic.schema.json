@@ -48,13 +48,18 @@
     "labels": {
       "required": false,
       "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "min_items": 1,
+      "max_items": 10,
       "description": "Example label list"
     },
     "metadata": {
       "required": false,
       "type": "object",
+      "required_children": ["owner"],
       "description": "Example metadata object"
     }
   }
 }
-

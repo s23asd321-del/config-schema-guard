@@ -19,9 +19,11 @@ It is useful for:
 ## What it can do
 
 - Load local JSON and TOML config files.
-- Load a local schema JSON file.
+- Load a local schema JSON or TOML file.
 - Validate dot-path fields such as `server.port`.
 - Check `required`, `type`, `allowed`, `min`, `max`, `min_length`, and `max_length`.
+- Check lightweight array rules such as `items.type`, `min_items`, and `max_items`.
+- Check lightweight object child requirements with `required_children`.
 - Redact sensitive values in reports.
 - Produce text, Markdown, and JSON reports.
 - Return CI-friendly exit codes.
@@ -44,6 +46,16 @@ It is useful for:
 Full JSON Schema is powerful and broadly useful, but it can be more than a small project needs for example config checks. This project intentionally starts with a smaller custom format that is easy to read, easy to version, and simple to explain.
 
 For advanced validation, broad ecosystem compatibility, or formal schema requirements, use JSON Schema and a mature validator.
+
+| Need | Use config-schema-guard | Use JSON Schema |
+| --- | --- | --- |
+| Small local example config checks | Yes | Maybe |
+| CI guardrails for JSON/TOML examples | Yes | Maybe |
+| A tiny schema format people can read quickly | Yes | Maybe |
+| Cross-language schema standard | No | Yes |
+| Complex conditional validation | No | Yes |
+| Mature validator ecosystem | No | Yes |
+| Formal API or contract validation | No | Yes |
 
 ## Installation
 
@@ -149,6 +161,20 @@ token = "FAKE_TOKEN_FOR_TESTING_ONLY"
       "required": false,
       "type": "string",
       "sensitive": true
+    },
+    "labels": {
+      "required": false,
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "min_items": 1,
+      "max_items": 10
+    },
+    "metadata": {
+      "required": false,
+      "type": "object",
+      "required_children": ["owner"]
     }
   }
 }
@@ -162,10 +188,12 @@ config-guard check <config-path> --schema <schema-path>
 
 Options:
 
+- `--version`: print the installed CLI version.
 - `--format text`: terminal-oriented output.
 - `--format markdown`: Markdown report output.
 - `--format json`: machine-readable JSON report.
-- `--output <file>`: write the report to a local file.
+- `--output <file>`: write the report to a local file. Existing files are not overwritten by default.
+- `--force`: allow `--output` to overwrite an existing file.
 - `--strict`: report schema-unknown fields as warnings.
 - `--no-values`: omit all config values from the report.
 
@@ -173,6 +201,7 @@ Examples:
 
 ```bash
 python -m config_schema_guard.cli check examples/good-config/config.json --schema examples/schema/basic.schema.json
+python -m config_schema_guard.cli check examples/good-config/config.toml --schema examples/schema/basic.schema.toml
 python -m config_schema_guard.cli check examples/bad-config/config.json --schema examples/schema/basic.schema.json --format markdown
 python -m config_schema_guard.cli check examples/bad-config/config.toml --schema examples/schema/basic.schema.json --format json
 ```
@@ -236,6 +265,7 @@ Warnings do not fail the command in v0.1.
 ## Examples directory
 
 - `examples/schema/basic.schema.json`: sample v1 schema.
+- `examples/schema/basic.schema.toml`: equivalent sample v1 schema in TOML.
 - `examples/good-config/config.json`: JSON config expected to pass.
 - `examples/good-config/config.toml`: TOML config expected to pass.
 - `examples/bad-config/config.json`: JSON config expected to fail validation.
@@ -247,11 +277,15 @@ All example sensitive values are fake placeholders.
 
 ```bash
 python -m pytest
+python -m ruff check .
+python -m mypy
+python -m coverage run -m pytest
+python -m coverage report
 ```
 
 ## GitHub Actions and CI
 
-The included workflow tests Python 3.11 and 3.12, installs the package with development dependencies, runs pytest, and checks the example configs. The bad example is expected to return exit code `1`; the workflow verifies that behavior without failing the whole CI job.
+The included workflow tests Python 3.11, 3.12, and 3.13. It installs development dependencies, runs ruff, mypy, coverage-backed pytest, and checks the example configs. The bad example is expected to return exit code `1`; the workflow verifies that behavior without failing the whole CI job.
 
 ## Roadmap
 

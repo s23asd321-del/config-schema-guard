@@ -84,6 +84,9 @@ def validate_config(
         if type_ok:
             _check_min_max(results, field_path, rules, value, description, no_values)
             _check_length(results, field_path, rules, value, description, no_values)
+            _check_item_count(results, field_path, rules, value, description, no_values)
+            _check_items(results, field_path, rules, value, description, no_values)
+            _check_required_children(results, field_path, rules, value, description, no_values)
 
     if strict:
         results.extend(_find_unknown_fields(config, fields, no_values=no_values))
@@ -335,6 +338,226 @@ def _check_length(
             )
 
 
+def _check_item_count(
+    results: list[ValidationResult],
+    field_path: str,
+    rules: Mapping[str, Any],
+    value: Any,
+    description: str | None,
+    no_values: bool,
+) -> None:
+    if "min_items" in rules:
+        if not isinstance(value, list):
+            results.append(
+                _result(
+                    field_path,
+                    "min_items",
+                    Severity.ERROR,
+                    False,
+                    "Value is not an array; cannot apply min_items.",
+                    rules,
+                    value=value,
+                    description=description,
+                    no_values=no_values,
+                )
+            )
+        elif len(value) < rules["min_items"]:
+            results.append(
+                _result(
+                    field_path,
+                    "min_items",
+                    Severity.ERROR,
+                    False,
+                    f"Array length is less than minimum {rules['min_items']}.",
+                    rules,
+                    value=value,
+                    description=description,
+                    no_values=no_values,
+                )
+            )
+        else:
+            results.append(
+                _result(
+                    field_path,
+                    "min_items",
+                    Severity.PASSED,
+                    True,
+                    f"Array length is at least {rules['min_items']}.",
+                    rules,
+                    value=value,
+                    description=description,
+                    no_values=no_values,
+                )
+            )
+
+    if "max_items" in rules:
+        if not isinstance(value, list):
+            results.append(
+                _result(
+                    field_path,
+                    "max_items",
+                    Severity.ERROR,
+                    False,
+                    "Value is not an array; cannot apply max_items.",
+                    rules,
+                    value=value,
+                    description=description,
+                    no_values=no_values,
+                )
+            )
+        elif len(value) > rules["max_items"]:
+            results.append(
+                _result(
+                    field_path,
+                    "max_items",
+                    Severity.ERROR,
+                    False,
+                    f"Array length is greater than maximum {rules['max_items']}.",
+                    rules,
+                    value=value,
+                    description=description,
+                    no_values=no_values,
+                )
+            )
+        else:
+            results.append(
+                _result(
+                    field_path,
+                    "max_items",
+                    Severity.PASSED,
+                    True,
+                    f"Array length is at most {rules['max_items']}.",
+                    rules,
+                    value=value,
+                    description=description,
+                    no_values=no_values,
+                )
+            )
+
+
+def _check_items(
+    results: list[ValidationResult],
+    field_path: str,
+    rules: Mapping[str, Any],
+    value: Any,
+    description: str | None,
+    no_values: bool,
+) -> None:
+    if "items" not in rules:
+        return
+
+    item_type = rules["items"]["type"]
+    if not isinstance(value, list):
+        results.append(
+            _result(
+                field_path,
+                "items.type",
+                Severity.ERROR,
+                False,
+                "Value is not an array; cannot apply items.type.",
+                rules,
+                value=value,
+                description=description,
+                no_values=no_values,
+            )
+        )
+        return
+
+    mismatches = [
+        (index, item)
+        for index, item in enumerate(value)
+        if not _matches_type(item, item_type)
+    ]
+    if mismatches:
+        index, item = mismatches[0]
+        results.append(
+            _result(
+                field_path,
+                "items.type",
+                Severity.ERROR,
+                False,
+                f"Array item at index {index} expected type '{item_type}', got '{_type_name(item)}'.",
+                rules,
+                value=value,
+                description=description,
+                no_values=no_values,
+            )
+        )
+    else:
+        results.append(
+            _result(
+                field_path,
+                "items.type",
+                Severity.PASSED,
+                True,
+                f"All array items match type '{item_type}'.",
+                rules,
+                value=value,
+                description=description,
+                no_values=no_values,
+            )
+        )
+
+
+def _check_required_children(
+    results: list[ValidationResult],
+    field_path: str,
+    rules: Mapping[str, Any],
+    value: Any,
+    description: str | None,
+    no_values: bool,
+) -> None:
+    if "required_children" not in rules:
+        return
+
+    if not isinstance(value, Mapping):
+        results.append(
+            _result(
+                field_path,
+                "required_children",
+                Severity.ERROR,
+                False,
+                "Value is not an object; cannot apply required_children.",
+                rules,
+                value=value,
+                description=description,
+                no_values=no_values,
+            )
+        )
+        return
+
+    missing = [child for child in rules["required_children"] if child not in value]
+    if missing:
+        joined = ", ".join(missing)
+        results.append(
+            _result(
+                field_path,
+                "required_children",
+                Severity.ERROR,
+                False,
+                f"Required child fields are missing: {joined}.",
+                rules,
+                value=value,
+                description=description,
+                no_values=no_values,
+            )
+        )
+    else:
+        results.append(
+            _result(
+                field_path,
+                "required_children",
+                Severity.PASSED,
+                True,
+                "Required child fields are present.",
+                rules,
+                value=value,
+                description=description,
+                no_values=no_values,
+            )
+        )
+
+
 def _find_unknown_fields(
     config: Mapping[str, Any],
     fields: Mapping[str, Any],
@@ -451,4 +674,3 @@ def _type_name(value: Any) -> str:
     if value is None:
         return "null"
     return type(value).__name__
-

@@ -6,6 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from config_schema_guard import __version__
 from config_schema_guard.loader import ConfigLoadError, load_config
 from config_schema_guard.report import build_report, render_report
 from config_schema_guard.schema import SchemaError, load_schema
@@ -16,6 +17,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="config-guard",
         description="Validate JSON and TOML config files against a lightweight schema.",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     subparsers = parser.add_subparsers(dest="command")
 
@@ -33,6 +39,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Report output format.",
     )
     check.add_argument("--output", help="Optional path to write the report.")
+    check.add_argument(
+        "--force",
+        action="store_true",
+        help="Allow --output to overwrite an existing file.",
+    )
     check.add_argument(
         "--strict",
         action="store_true",
@@ -81,6 +92,11 @@ def _run_check(args: argparse.Namespace) -> int:
 
         if args.output:
             output_path = Path(args.output)
+            if output_path.exists() and not args.force:
+                raise ValueError(
+                    f"Output file already exists: {output_path}. "
+                    "Use --force to overwrite it."
+                )
             output_path.write_text(rendered + "\n", encoding="utf-8")
         else:
             print(rendered)
@@ -93,4 +109,3 @@ def _run_check(args: argparse.Namespace) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

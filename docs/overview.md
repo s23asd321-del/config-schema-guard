@@ -29,3 +29,6 @@ This project adds a lightweight pre-check for those cases.
 - Keep teaching examples aligned with docs.
 - Demonstrate simple schema-driven validation.
 
+## When to choose something else
+
+Use JSON Schema and a mature validator when you need a standard schema language, cross-language compatibility, complex conditional validation, deep nested object constraints, or formal API contract validation.

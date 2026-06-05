@@ -53,3 +53,6 @@ Each result includes:
 
 Reports are local files or terminal output. Before sharing a report publicly, check that it does not contain private paths, sensitive values, or project-specific details you do not want to disclose.
 
+## Writing reports to files
+
+Use `--output <file>` to write a report locally. Existing files are not overwritten by default. Add `--force` only when you intentionally want to replace the existing file.

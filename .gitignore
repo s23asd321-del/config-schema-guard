@@ -1,6 +1,8 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
 .venv/
 venv/
 dist/
@@ -14,4 +16,3 @@ htmlcov/
 *.log
 *.sqlite
 *.db
-

@@ -9,6 +9,8 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e ".[dev]"
 python -m pytest
+python -m ruff check .
+python -m mypy
 ```
 
 ## Guidelines
@@ -23,4 +25,3 @@ python -m pytest
 ## Pull requests
 
 Before opening a pull request, run `python -m pytest` and check that examples contain only fake placeholder values.
-

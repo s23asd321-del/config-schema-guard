@@ -79,6 +79,54 @@ def test_min_length_and_max_length_mismatch_produce_errors():
     assert not result_for(long_results, "app.name", "max_length").passed
 
 
+def test_array_item_type_mismatch_produces_error():
+    schema = schema_with(
+        {
+            "labels": {
+                "required": True,
+                "type": "array",
+                "items": {"type": "string"},
+            }
+        }
+    )
+
+    results = validate_config({"labels": ["local", 123]}, schema)
+
+    result = result_for(results, "labels", "items.type")
+    assert not result.passed
+    assert "index 1" in result.message
+
+
+def test_min_items_and_max_items_mismatch_produce_errors():
+    schema = schema_with(
+        {"labels": {"required": True, "type": "array", "min_items": 1, "max_items": 2}}
+    )
+
+    empty_results = validate_config({"labels": []}, schema)
+    long_results = validate_config({"labels": ["a", "b", "c"]}, schema)
+
+    assert not result_for(empty_results, "labels", "min_items").passed
+    assert not result_for(long_results, "labels", "max_items").passed
+
+
+def test_required_children_missing_produces_error():
+    schema = schema_with(
+        {
+            "metadata": {
+                "required": True,
+                "type": "object",
+                "required_children": ["owner"],
+            }
+        }
+    )
+
+    results = validate_config({"metadata": {}}, schema)
+
+    result = result_for(results, "metadata", "required_children")
+    assert not result.passed
+    assert "owner" in result.message
+
+
 def test_optional_missing_field_does_not_produce_error():
     schema = schema_with({"logging.level": {"required": False, "type": "string"}})
 
@@ -115,6 +163,7 @@ def test_non_strict_mode_ignores_unknown_field():
 
 def test_examples_good_and_bad_configs_behave_as_expected():
     schema = load_schema(PROJECT_ROOT / "examples/schema/basic.schema.json")
+    toml_schema = load_schema(PROJECT_ROOT / "examples/schema/basic.schema.toml")
     good_json = load_config(PROJECT_ROOT / "examples/good-config/config.json")
     good_toml = load_config(PROJECT_ROOT / "examples/good-config/config.toml")
     bad_json = load_config(PROJECT_ROOT / "examples/bad-config/config.json")
@@ -122,6 +171,6 @@ def test_examples_good_and_bad_configs_behave_as_expected():
 
     assert not any(item.severity.value == "error" for item in validate_config(good_json, schema))
     assert not any(item.severity.value == "error" for item in validate_config(good_toml, schema))
+    assert not any(item.severity.value == "error" for item in validate_config(good_json, toml_schema))
     assert any(item.severity.value == "error" for item in validate_config(bad_json, schema))
     assert any(item.severity.value == "error" for item in validate_config(bad_toml, schema))
-

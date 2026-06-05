@@ -1,0 +1,61 @@
+version = 1
+name = "basic app config"
+
+[fields."app.name"]
+required = true
+type = "string"
+min_length = 3
+max_length = 40
+description = "Application name"
+
+[fields."app.debug"]
+required = true
+type = "boolean"
+description = "Debug mode flag"
+
+[fields."app.description"]
+required = false
+type = "string"
+min_length = 10
+max_length = 80
+description = "Short application description"
+
+[fields."server.host"]
+required = true
+type = "string"
+description = "Local host name or bind address"
+
+[fields."server.port"]
+required = true
+type = "integer"
+min = 1
+max = 65535
+description = "TCP port number"
+
+[fields."logging.level"]
+required = false
+type = "string"
+allowed = ["debug", "info", "warning", "error"]
+description = "Application log level"
+
+[fields."auth.token"]
+required = false
+type = "string"
+sensitive = true
+description = "Optional fake token used only in examples"
+
+[fields.labels]
+required = false
+type = "array"
+min_items = 1
+max_items = 10
+description = "Example label list"
+
+[fields.labels.items]
+type = "string"
+
+[fields.metadata]
+required = false
+type = "object"
+required_children = ["owner"]
+description = "Example metadata object"

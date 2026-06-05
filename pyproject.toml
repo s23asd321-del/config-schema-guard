@@ -21,13 +21,19 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Software Development :: Quality Assurance",
   "Topic :: Utilities",
 ]
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = [
+  "coverage[toml]",
+  "mypy",
+  "pytest",
+  "ruff",
+]
 
 [project.scripts]
 config-guard = "config_schema_guard.cli:main"
@@ -35,3 +41,30 @@ config-guard = "config_schema_guard.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+config_schema_guard = ["py.typed"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "UP"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src/config_schema_guard"]
+check_untyped_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[tool.coverage.run]
+branch = true
+source = ["config_schema_guard"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

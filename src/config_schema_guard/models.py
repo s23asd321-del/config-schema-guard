@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 
-class Severity(str, Enum):
+class Severity(StrEnum):
     """Severity values used in validation results."""
 
     PASSED = "passed"
@@ -73,4 +73,3 @@ class ValidationReport:
             ],
             "generated_at": self.generated_at,
         }
-
